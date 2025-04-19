@@ -7,7 +7,13 @@
 
 import CoreData
 
-final class WeatherDataController {
+protocol WeatherDataControlling {
+    func saveWeather(for cityName: String, country: String?, from response: WeatherResponse, completion: @escaping (Result<Void, Error>) -> Void)
+    func fetchSavedCities() -> Result<[City], Error>
+    func deleteCity(_ city: City, completion: @escaping (Result<Void, Error>) -> Void)
+}
+
+class WeatherDataController: WeatherDataControlling {
     private let context: NSManagedObjectContext
 
     init(context: NSManagedObjectContext = DataController.shared.context) {

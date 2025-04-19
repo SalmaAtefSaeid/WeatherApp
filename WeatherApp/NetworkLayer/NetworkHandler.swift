@@ -7,7 +7,11 @@
 
 import Foundation
 
-final class NetworkHandler {
+protocol NetworkHandling {
+    func fetchWeatherByCity(_ cityName: String, completion: @escaping (Result<WeatherResponse, Error>) -> Void)
+}
+
+class NetworkHandler: NetworkHandling {
     
     func fetchWeatherByCity(_ cityName: String, completion: @escaping (Result<WeatherResponse, Error>) -> Void) {
         let parameters = [

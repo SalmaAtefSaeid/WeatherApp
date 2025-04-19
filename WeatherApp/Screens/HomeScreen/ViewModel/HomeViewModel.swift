@@ -14,7 +14,12 @@ final class HomeViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var alertItem: AlertItem?
     
-    init() {
+    private let networkHandler: NetworkHandling
+    private let weatherDataController: WeatherDataControlling
+    
+    init(networkHandler: NetworkHandling = NetworkHandler(), weatherDataController: WeatherDataControlling = WeatherDataController()) {
+        self.networkHandler = networkHandler
+        self.weatherDataController = weatherDataController
         fetchSavedCities()
     }
     
@@ -23,7 +28,6 @@ final class HomeViewModel: ObservableObject {
         isLoading = true
         alertItem = nil
         
-        let networkHandler = NetworkHandler()
         networkHandler.fetchWeatherByCity(city) { result in
             
             DispatchQueue.main.async { [weak self] in
@@ -50,7 +54,7 @@ final class HomeViewModel: ObservableObject {
     
     // Save city weather data
     func saveCity(_ weather: WeatherResponse, countryAbbreviation: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        WeatherDataController().saveWeather(for: weather.cityName, country: countryAbbreviation, from: weather) { result in
+        weatherDataController.saveWeather(for: weather.cityName, country: countryAbbreviation, from: weather) { result in
             switch result {
             case .success:
                 completion(.success(()))
@@ -65,7 +69,7 @@ final class HomeViewModel: ObservableObject {
         isLoading = true
         alertItem = nil
         
-        let result = WeatherDataController().fetchSavedCities()
+        let result = weatherDataController.fetchSavedCities()
         
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
@@ -85,7 +89,7 @@ final class HomeViewModel: ObservableObject {
     // Delete a city
     func deleteSavedCity(_ city: String) {
         // Fetch saved cities and handle the result
-        let result = WeatherDataController().fetchSavedCities()
+        let result = weatherDataController.fetchSavedCities()
         
         switch result {
         case .success(let cities):
@@ -99,7 +103,7 @@ final class HomeViewModel: ObservableObject {
             }
             
             // Proceed with deleting the city
-            WeatherDataController().deleteCity(cityToDelete) { result in
+            weatherDataController.deleteCity(cityToDelete) { result in
                 DispatchQueue.main.async { [weak self] in
                     guard let self else { return }
                     switch result {
